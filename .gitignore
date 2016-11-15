@@ -8,3 +8,5 @@
 *.bat
 
 gradlew
+
+app/app.iml

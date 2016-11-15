@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,9 +23,9 @@ import java.util.UUID;
 
 public class ledControl extends AppCompatActivity {
 
-    Button btnOn, btnOff, btnDis;
+    Button btnSend, btnOff, btnDis;
     SeekBar brightness;
-    TextView lumn;
+    TextView textView2, lumn;
     String address = null;
     private ProgressDialog progress;
     BluetoothAdapter myBluetooth = null;
@@ -45,7 +46,7 @@ public class ledControl extends AppCompatActivity {
         setContentView(R.layout.activity_led_control);
 
         //call the widgtes
-        btnOn = (Button)findViewById(R.id.button2);
+        btnSend = (Button)findViewById(R.id.button2);
         btnOff = (Button)findViewById(R.id.button3);
         btnDis = (Button)findViewById(R.id.button4);
         brightness = (SeekBar)findViewById(R.id.seekBar);
@@ -54,11 +55,15 @@ public class ledControl extends AppCompatActivity {
         new ConnectBT().execute(); //Call the class to connect
 
         //commands to be sent to bluetooth
-        btnOn.setOnClickListener(new View.OnClickListener()
+        btnSend.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
+                EditText editText = (EditText) findViewById(R.id.edit_message);
+                String message = editText.getText().toString();
+                textView2 = (TextView)findViewById(R.id.textView2);
+                textView2.setText(message);
                 turnOnLed();      //method to turn on
             }
         });
