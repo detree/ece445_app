@@ -1,6 +1,7 @@
 char command;
 String string;
 boolean ledon = false;
+long lastT = 0;
 #define led 13
 
   void setup()
@@ -41,17 +42,12 @@ boolean ledon = false;
     {
         ledOff();
         ledon = false;
-        Serial.println(string);
+        //Serial.println(string);
     }
-    
-    if ((string.toInt()>=0)&&(string.toInt()<=255))
-    {
-      if (ledon==true)
-      {
-        analogWrite(led, string.toInt());
-        Serial.println(string);
-        delay(10);
-      }
+    long currT = millis();
+    if(currT-lastT>2000){
+      Serial.println(millis()/1000);
+      lastT = currT;
     }
  }
  

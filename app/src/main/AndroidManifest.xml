@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="ece445.BTtoAdruino.ledControl"
+            android:name="ece445.BTtoAdruino.BTCommActivity"
             android:label="LED Control" >
         </activity>
     </application>
