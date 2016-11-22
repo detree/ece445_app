@@ -19,12 +19,14 @@ public class BTActions {
     private String TAG = "BTActions";
     private Handler myHandler;
     private BTRecvTh btrecv = null;
+    MsgFormatter msgFormatter = null;
 
     BluetoothSocket btSocket = null;
 
-    public BTActions(BluetoothSocket skt, Handler handler){
+    BTActions(BluetoothSocket skt, Handler handler){
         myHandler = handler;
         btSocket = skt;
+        msgFormatter = new MsgFormatter(myHandler);
     }
 
     private class BTSendOnceTh implements Runnable{
@@ -76,6 +78,7 @@ public class BTActions {
                     if (read.contains("\n")) {
                         Log.d(TAG, read);
                         myHandler.obtainMessage(Parameter.BTMSG_RECV_SUCCESS, msgRecv.toString()).sendToTarget();
+                        msgFormatter.decodeAndAct(msgRecv.toString());
                         msgRecv.setLength(0);
                     }
                 } catch (IOException e) {

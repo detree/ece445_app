@@ -17,34 +17,45 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.io.IOException;
 import java.util.UUID;
 
 
 public class BTCommActivity extends AppCompatActivity {
     private String TAG = "BTCommActivity";
+    //UI components=========================
     Button btnSend, btnSync, btnDisconnect;
-    TextView textView_send, textView_recv;
+    TextView txtV_send, txtV_recv, txtV_weight, txtV_vol;
+    //Bluetooth & GPS from System=========================
     String address = null;
     BluetoothAdapter myBluetooth = null;
     BluetoothSocket btSocket = null;
+    static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //SPP UUID. Look for it
+    GoogleApiClient mPlayApi = null;
+    //My custom Bluetooth protocol=========================
     BTActions btActions = null;
     private boolean isBtConnected = false;
-    //SPP UUID. Look for it
-    static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     Handler myHandler = new Handler() {
         @Override
         public void handleMessage(Message inputMsg) {
             switch (inputMsg.what){
                 case Parameter.BTMSG_SEND_SUCCESS:
-                    textView_send.setText("SUCC:"+(String)inputMsg.obj);
+                    txtV_send.setText("SUCC:"+ inputMsg.obj);
                     break;
                 case Parameter.BT_CONNECT_FAIL:
                     msg("Connection FAILED. Please disconnect then reconnect");
                     break;
                 case Parameter.BTMSG_RECV_SUCCESS:
-                    textView_recv.setText("SUCC:"+(String)inputMsg.obj);
+                    txtV_recv.setText("SUCC:"+ inputMsg.obj);
+                    break;
+                case Parameter.BTMSG_UPDATE_VOLUME:
+                    txtV_vol.setText(Integer.toString((int)inputMsg.obj));
+                    break;
+                case Parameter.BTMSG_UPDATE_WEIGHT:
+                    txtV_weight.setText(Integer.toString((int)inputMsg.obj));
                     break;
             }
         }
@@ -65,8 +76,10 @@ public class BTCommActivity extends AppCompatActivity {
         btnSend = (Button)findViewById(R.id.button2);
         btnSync = (Button)findViewById(R.id.button3);
         btnDisconnect = (Button)findViewById(R.id.button4);
-        textView_send = (TextView)findViewById(R.id.textView2);
-        textView_recv = (TextView)findViewById(R.id.textView4);
+        txtV_send = (TextView)findViewById(R.id.textView2);
+        txtV_recv = (TextView)findViewById(R.id.textView4);
+        txtV_weight = (TextView)findViewById(R.id.textView6_1);
+        txtV_vol = (TextView)findViewById(R.id.textView6_2);
 
         new InitBT().execute(); //Call the class to connect
     }
@@ -88,7 +101,7 @@ public class BTCommActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                btActions.sendMsgOnce("TF");
+                btActions.sendMsgOnce(MsgFormatter.encodeRecalcWeight()+"\n");
             }
         });
 
