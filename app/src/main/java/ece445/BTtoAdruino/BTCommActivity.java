@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,13 +19,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
 import java.util.UUID;
 
 
-public class BTCommActivity extends AppCompatActivity {
+public class BTCommActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private String TAG = "BTCommActivity";
     //UI components=========================
     Button btnSend, btnSync, btnDisconnect;
@@ -81,12 +85,19 @@ public class BTCommActivity extends AppCompatActivity {
         txtV_weight = (TextView)findViewById(R.id.textView6_1);
         txtV_vol = (TextView)findViewById(R.id.textView6_2);
 
+        if (mPlayApi == null) {
+            mPlayApi = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
         new InitBT().execute(); //Call the class to connect
     }
 
     @Override
     protected void onStart(){
-        super.onStart();
         //commands to be sent to bluetooth
         btnSend.setOnClickListener(new View.OnClickListener()
         {
@@ -114,10 +125,9 @@ public class BTCommActivity extends AppCompatActivity {
                 finish(); //return to the first layout
             }
         });
-//                EditText editText = (EditText) findViewById(R.id.edit_message);
-//                String message = editText.getText().toString();
-//                textView_send = (TextView)findViewById(R.id.textView2);
-//                textView_send.setText(message);
+
+        mPlayApi.connect();
+        super.onStart();
     }
 
     private void Disconnect() {
@@ -158,6 +168,28 @@ public class BTCommActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStop() {
+        mPlayApi.disconnect();
+        super.onStop();
+    }
+
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
 
