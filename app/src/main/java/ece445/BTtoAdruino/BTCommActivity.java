@@ -31,16 +31,17 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
     private String TAG = "BTCommActivity";
     //UI components=========================
     Button btnSend, btnSync, btnDisconnect;
-    TextView txtV_send, txtV_recv, txtV_weight, txtV_vol;
+    TextView txtV_send, txtV_recv, txtV_weight, txtV_vol, txtV_gps, txtV_est;
     //Bluetooth & GPS from System=========================
     String address = null;
     BluetoothAdapter myBluetooth = null;
     BluetoothSocket btSocket = null;
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //SPP UUID. Look for it
     GoogleApiClient mPlayApi = null;
-    //My custom Bluetooth protocol=========================
+    //My custom Bluetooth & GPS protocol=========================
     BTActions btActions = null;
     private boolean isBtConnected = false;
+    private GPSComm gpsComm = null;
 
     Handler myHandler = new Handler() {
         @Override
@@ -60,6 +61,12 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
                     break;
                 case Parameter.BTMSG_UPDATE_WEIGHT:
                     txtV_weight.setText(Integer.toString((int)inputMsg.obj));
+                    break;
+                case Parameter.GPSMSG_UPDATED:
+                    txtV_gps.setText((String)inputMsg.obj);
+                    break;
+                case Parameter.GPSMSG_DIST_UPDATED:
+                    txtV_est.setText(Double.toString((Double) inputMsg.obj));
                     break;
             }
         }
@@ -84,6 +91,8 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
         txtV_recv = (TextView)findViewById(R.id.textView4);
         txtV_weight = (TextView)findViewById(R.id.textView6_1);
         txtV_vol = (TextView)findViewById(R.id.textView6_2);
+        txtV_gps = (TextView)findViewById(R.id.textView8_1);
+        txtV_est = (TextView)findViewById(R.id.textView8_2);
 
         if (mPlayApi == null) {
             mPlayApi = new GoogleApiClient.Builder(this)
@@ -179,7 +188,10 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+//        msg("Google Play client connection SUCCESS!");
+        gpsComm = new GPSComm(mPlayApi, myHandler, this);
+        gpsComm.firstComm();
+        gpsComm.startUpdate();
     }
 
     @Override
@@ -189,7 +201,7 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        msg("Google Play client connection FAILED!");
     }
 
 
@@ -233,7 +245,7 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
 
             if (!ConnectSuccess) {
                 msg("Connection Failed. Is it a SPP Bluetooth? Try again.");
-                finish();
+//                finish();
             }
             else {
                 msg("Connected.");
