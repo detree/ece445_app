@@ -14,7 +14,7 @@ boolean needResendW = true;
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 long lastT = 0;
-#define led 13
+#define led 6
 
 void setup(){
   Serial.begin(9600);
@@ -24,7 +24,6 @@ void setup(){
 
 void loop()
 {
-  // print the string when a newline arrives:
   if (stringComplete) {
     if(inputString[0]==recalcW){
       totalWeight++;

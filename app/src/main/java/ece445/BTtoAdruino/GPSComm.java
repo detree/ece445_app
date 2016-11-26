@@ -81,8 +81,8 @@ class GPSComm implements LocationListener {
         }
         lastLoc = null;
         mLocReq = new LocationRequest();
-        mLocReq.setInterval(10000);
-        mLocReq.setFastestInterval(5000);
+        mLocReq.setInterval(1000);
+        mLocReq.setFastestInterval(500);
         mLocReq.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ActivityCompat.checkSelfPermission(contextIn, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(contextIn, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(contextIn, "no permission to GPS", Toast.LENGTH_LONG).show();
@@ -103,7 +103,7 @@ class GPSComm implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "location changed");
-        if(location.getAccuracy()<2.0 && location.getAccuracy()!=0.0) {
+        if(location.getAccuracy()<4.5 && location.getAccuracy()!=0.0) {
             if(lastLoc == null) lastLoc = location;
             double dx = lastLoc.distanceTo(location);
             lastLoc = location;

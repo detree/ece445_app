@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,12 +25,14 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.UUID;
 
 
 public class BTCommActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private String TAG = "BTCommActivity";
     //UI components=========================
+    EditText editText;
     Button btnSend, btnSync, btnDisconnect;
     TextView txtV_send, txtV_recv, txtV_weight, txtV_vol, txtV_gps, txtV_est;
     //Bluetooth & GPS from System=========================
@@ -46,6 +49,7 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
     Handler myHandler = new Handler() {
         @Override
         public void handleMessage(Message inputMsg) {
+            Calendar now = Calendar.getInstance();
             switch (inputMsg.what){
                 case Parameter.BTMSG_SEND_SUCCESS:
                     txtV_send.setText("SUCC:"+ inputMsg.obj);
@@ -54,7 +58,7 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
                     msg("Connection FAILED. Please disconnect then reconnect");
                     break;
                 case Parameter.BTMSG_RECV_SUCCESS:
-                    txtV_recv.setText("SUCC:"+ inputMsg.obj);
+                    txtV_recv.setText("["+now.get(Calendar.MINUTE)+":"+now.get(Calendar.SECOND)+"]SUCC:"+ inputMsg.obj);
                     break;
                 case Parameter.BTMSG_UPDATE_VOLUME:
                     txtV_vol.setText(Integer.toString((int)inputMsg.obj));
@@ -93,6 +97,7 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
         txtV_vol = (TextView)findViewById(R.id.textView6_2);
         txtV_gps = (TextView)findViewById(R.id.textView8_1);
         txtV_est = (TextView)findViewById(R.id.textView8_2);
+        editText = (EditText)findViewById(R.id.edit_message);
 
         if (mPlayApi == null) {
             mPlayApi = new GoogleApiClient.Builder(this)
@@ -113,7 +118,9 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
             @Override
             public void onClick(View v)
             {
-                btActions.sendMsgOnce("TO");
+                if(String.valueOf(editText.getText()).indexOf("www")==0)
+                    btActions.sendMsgOnce( MsgFormatter.encodeUserInputWeight(
+                            String.valueOf( editText.getText() ).substring(3) ) ) ;
             }
         });
 
@@ -121,7 +128,7 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
             @Override
             public void onClick(View v)
             {
-                btActions.sendMsgOnce(MsgFormatter.encodeRecalcWeight()+"\n");
+                btActions.sendMsgOnce(MsgFormatter.encodeRecalcWeight());
             }
         });
 
