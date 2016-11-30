@@ -25,6 +25,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -34,7 +35,7 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
     //UI components=========================
     EditText editText;
     Button btnSend, btnSync, btnDisconnect;
-    TextView txtV_send, txtV_recv, txtV_weight, txtV_vol, txtV_gps, txtV_est;
+    TextView txtV_send, txtV_recv, txtV_weight, txtV_vol, txtV_gps, txtV_distLeft;
     //Bluetooth & GPS from System=========================
     String address = null;
     BluetoothAdapter myBluetooth = null;
@@ -45,6 +46,8 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
     BTActions btActions = null;
     private boolean isBtConnected = false;
     private GPSComm gpsComm = null;
+    //The custom varialbes for calculating how many distance left==============
+    private int accumWater=0, currWater = 0, currWeight;
 
     Handler myHandler = new Handler() {
         @Override
@@ -61,16 +64,25 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
                     txtV_recv.setText("["+now.get(Calendar.MINUTE)+":"+now.get(Calendar.SECOND)+"]SUCC:"+ inputMsg.obj);
                     break;
                 case Parameter.BTMSG_UPDATE_VOLUME:
-                    txtV_vol.setText(Integer.toString((int)inputMsg.obj));
+                    int currtmp = (int)inputMsg.obj;
+                    if(currtmp> currWater || (currtmp<currWater && currtmp>1))
+                        accumWater+=(currtmp-currWater);
+                    currWater = currtmp;
+                    txtV_vol.setText(Integer.toString(currWater)+"/"+ Integer.toString(accumWater));
                     break;
                 case Parameter.BTMSG_UPDATE_WEIGHT:
-                    txtV_weight.setText(Integer.toString((int)inputMsg.obj));
+                    currWeight =(int)inputMsg.obj;
+                    txtV_weight.setText(Integer.toString(currWeight));
                     break;
                 case Parameter.GPSMSG_UPDATED:
                     txtV_gps.setText((String)inputMsg.obj);
                     break;
                 case Parameter.GPSMSG_DIST_UPDATED:
-                    txtV_est.setText(Double.toString((Double) inputMsg.obj));
+                    double totalDist = (Double) inputMsg.obj;
+                    double distLeft = (currWeight-currWater)/((accumWater+1)/(totalDist+1));
+                    DecimalFormat format = new DecimalFormat("#####.###");
+                    txtV_distLeft.setText("total dist="+format.format(totalDist)+"m\n"+
+                            format.format(distLeft/1000.0)+"km");
                     break;
             }
         }
@@ -96,7 +108,7 @@ public class BTCommActivity extends AppCompatActivity implements GoogleApiClient
         txtV_weight = (TextView)findViewById(R.id.textView6_1);
         txtV_vol = (TextView)findViewById(R.id.textView6_2);
         txtV_gps = (TextView)findViewById(R.id.textView8_1);
-        txtV_est = (TextView)findViewById(R.id.textView8_2);
+        txtV_distLeft = (TextView)findViewById(R.id.textView8_2);
         editText = (EditText)findViewById(R.id.edit_message);
 
         if (mPlayApi == null) {

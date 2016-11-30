@@ -103,7 +103,7 @@ class GPSComm implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "location changed");
-        if(location.getAccuracy()<4.5 && location.getAccuracy()!=0.0) {
+        if(location.getAccuracy()<16 && location.getAccuracy()!=0.0) {
             if(lastLoc == null) lastLoc = location;
             double dx = lastLoc.distanceTo(location);
             lastLoc = location;
