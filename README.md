@@ -1,4 +1,5 @@
 # ece445_app
+### *Notice* that there is also hardware code [here](https://github.com/detree/ece445_HWcode)
 app component and test ino files
 You should able to auto-import it into Android Studio. The build is build toward Android6, API23. Using Java7/8
 
